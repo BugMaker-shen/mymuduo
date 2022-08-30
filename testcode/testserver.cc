@@ -2,6 +2,7 @@
 
 #include <string>
 #include <functional>
+#include <exception>
 
 class EchoServer{
     public:
@@ -40,9 +41,17 @@ class EchoServer{
         TcpServer server_;
 };
 
-int main(){
+int main(int argc, char **argv){
+    if(argc != 3){
+        std::cerr << "the num of args must be 2! example: ./testserver 127.0.0.1 8989" << std::endl;
+        exit(1);
+    }
     EventLoop loop;
-    InetAddress addr(8888, "127.0.0.1");
+    //解析通过命令行参数传递的ip和port
+    char *ip = argv[1];
+    uint16_t port = atoi(argv[2]);
+
+    InetAddress addr(port, ip);
     EchoServer server(&loop, addr, "EchoServer-01");  // Acceptor non-blocking listenfd
     server.start();   // 会将listenfd封装成acceptChannel，添加到mainloop
     loop.loop();     // 启动EpollPoller
